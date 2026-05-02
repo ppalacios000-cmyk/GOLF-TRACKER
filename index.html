@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>I Love Viernes · Golf Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}</style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 p-4 md:p-8">
+
+<datalist id="dlPuntos">
+  <option value="No juega"></option>
+  <option value="NJ"></option>
+</datalist>
+
+<datalist id="dlCampo">
+  <option value="RSH campo norte"></option>
+  <option value="RSH campo sur"></option>
+  <option value="RSH Norte"></option>
+  <option value="RSH Sur"></option>
+</datalist>
+
+<div class="max-w-6xl mx-auto space-y-6">
+
+  <header class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8">
+    <div class="text-center space-y-2">
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">🏌️ Golf Tracker</h1>
+      <div class="text-xl md:text-2xl font-black">🏆 I Love Viernes</div>
+      <p class="text-slate-600 font-semibold">Temporada 2025–2026 · Pedro · Rodrigo · Agustín · Ricardo</p>
+      <div class="mt-2 text-sm text-slate-600 leading-relaxed">
+        <div>🏁 <span class="font-extrabold text-slate-900">Bandera (Par 3)</span>: +0,5 para el <span class="font-extrabold text-slate-900">total</span> (si hay varios ganadores se reparte el 0,5 entre ellos; cuenta aunque la partida sea ❌). NO afecta al handicap.</div>
+        <div>🏆 <span class="font-extrabold text-slate-900">Ganador</span>: +1 (si empate se reparte) para el <span class="font-extrabold text-slate-900">total</span> (cuenta aunque la partida sea ❌). Ganador se decide por puntos base.</div>
+        <div>🎖️ <span class="font-extrabold text-slate-900">Handicap</span>: se ajusta SOLO con puntos base (sin bonus ganador ni bandera). 17→-1, 18→-2, 19→-3… (progresivo).</div>
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        <div class="text-xs font-extrabold text-slate-500">PARTIDAS</div>
+        <div id="kpiPartidas" class="text-3xl font-extrabold">0</div>
+      </div>
+      <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        <div class="text-xs font-extrabold text-slate-500">LÍDER (PUNTOS)</div>
+        <div id="kpiLiderPuntos" class="text-xl font-extrabold mt-1">—</div>
+      </div>
+      <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        <div class="text-xs font-extrabold text-slate-500">LÍDER (VICTORIAS)</div>
+        <div id="kpiLiderWins" class="text-xl font-extrabold mt-1">—</div>
+      </div>
+      <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+        <div class="text-xs font-extrabold text-slate-500">LÍDER (P. BANDERA)</div>
+        <div id="kpiLiderBanderas" class="text-xl font-extrabold mt-1">—</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <h2 id="formTitle" class="text-2xl font-extrabold">➕ Nueva partida</h2>
+      <button id="btnCancelEdit" class="hidden px-4 py-2 rounded-2xl font-extrabold bg-slate-200 hover:bg-slate-300" type="button">Cancelar edición</button>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">📅 Fecha</label>
+        <input id="fecha" type="date" class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 font-semibold focus:outline-none focus:ring-4 focus:ring-slate-200">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">⛳ Campo</label>
+        <input id="campo" list="dlCampo" placeholder="RSH Norte/Sur o escribe otro…" class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 font-semibold focus:outline-none focus:ring-4 focus:ring-slate-200">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">Pedro (HCP <span id="hcpLbl_pedro">—</span>)</label>
+        <input id="p_pedro" list="dlPuntos" placeholder="0-50 o NJ" class="w-full rounded-2xl border border-emerald-200 bg-emerald-50 p-3 font-extrabold focus:outline-none focus:ring-4 focus:ring-emerald-100">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">Rodrigo (HCP <span id="hcpLbl_rodrigo">—</span>)</label>
+        <input id="p_rodrigo" list="dlPuntos" placeholder="0-50 o NJ" class="w-full rounded-2xl border border-sky-200 bg-sky-50 p-3 font-extrabold focus:outline-none focus:ring-4 focus:ring-sky-100">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">Agustín (HCP <span id="hcpLbl_agustin">—</span>)</label>
+        <input id="p_agustin" list="dlPuntos" placeholder="0-50 o NJ" class="w-full rounded-2xl border border-violet-200 bg-violet-50 p-3 font-extrabold focus:outline-none focus:ring-4 focus:ring-violet-100">
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-1">Ricardo (HCP <span id="hcpLbl_ricardo">—</span>)</label>
+        <input id="p_ricardo" list="dlPuntos" placeholder="0-50 o NJ" class="w-full rounded-2xl border border-amber-200 bg-amber-50 p-3 font-extrabold focus:outline-none focus:ring-4 focus:ring-amber-100">
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-bold text-slate-700 mb-1">🏁 Bandera (Par 3)</label>
+        <div id="bandera" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-bold cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" value="pedro" class="h-4 w-4 accent-slate-900">
+            <span>Pedro</span>
+          </label>
+          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-bold cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" value="rodrigo" class="h-4 w-4 accent-slate-900">
+            <span>Rodrigo</span>
+          </label>
+          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-bold cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" value="agustin" class="h-4 w-4 accent-slate-900">
+            <span>Agustín</span>
+          </label>
+          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 font-bold cursor-pointer hover:bg-slate-100">
+            <input type="checkbox" value="ricardo" class="h-4 w-4 accent-slate-900">
+            <span>Ricardo</span>
+          </label>
+        </div>
+        <p class="mt-1 text-xs text-slate-500 font-semibold">Suma +0,5 al total (cuenta incluso si la partida queda ❌ para Top-10). Si hay varios ganadores del par 3, se reparte el 0,5 entre los seleccionados. No afecta handicap ni ganador del día.</p>
+      </div>
+
+      <div class="lg:col-span-2 flex items-end">
+        <button id="btnSave" class="w-full rounded-3xl bg-slate-900 hover:bg-slate-800 text-white py-4 font-extrabold shadow-sm" type="button">💾 Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8">
+    <h2 class="text-2xl font-extrabold text-center">📊 Clasificación</h2>
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+        <div class="text-lg font-extrabold">Pedro</div>
+        <div class="mt-3 text-sm font-bold text-slate-700 space-y-1">
+          <div>🎖️ HCP: <span id="hcp_pedro" class="text-slate-900 font-extrabold">—</span></div>
+          <div>🎯 Jugadas: <span id="played_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>✅ Top-10 usadas: <span id="top10_pedro" class="text-slate-900 font-extrabold">0/10</span></div>
+          <div>📌 Total (General): <span id="total_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🎯 Base (Top-10): <span id="baseTop_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Bonus ganador (todas): <span id="bonus_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏁 Puntos bandera (todas): <span id="banderas_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Victorias: <span id="wins_pedro" class="text-slate-900 font-extrabold">0</span></div>
+          <div>⭐ Mejor día (base): <span id="best_pedro" class="text-slate-900 font-extrabold">0</span></div>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5">
+        <div class="text-lg font-extrabold">Rodrigo</div>
+        <div class="mt-3 text-sm font-bold text-slate-700 space-y-1">
+          <div>🎖️ HCP: <span id="hcp_rodrigo" class="text-slate-900 font-extrabold">—</span></div>
+          <div>🎯 Jugadas: <span id="played_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>✅ Top-10 usadas: <span id="top10_rodrigo" class="text-slate-900 font-extrabold">0/10</span></div>
+          <div>📌 Total (General): <span id="total_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🎯 Base (Top-10): <span id="baseTop_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Bonus ganador (todas): <span id="bonus_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏁 Puntos bandera (todas): <span id="banderas_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Victorias: <span id="wins_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>⭐ Mejor día (base): <span id="best_rodrigo" class="text-slate-900 font-extrabold">0</span></div>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-violet-200 bg-violet-50 p-5">
+        <div class="text-lg font-extrabold">Agustín</div>
+        <div class="mt-3 text-sm font-bold text-slate-700 space-y-1">
+          <div>🎖️ HCP: <span id="hcp_agustin" class="text-slate-900 font-extrabold">—</span></div>
+          <div>🎯 Jugadas: <span id="played_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>✅ Top-10 usadas: <span id="top10_agustin" class="text-slate-900 font-extrabold">0/10</span></div>
+          <div>📌 Total (General): <span id="total_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🎯 Base (Top-10): <span id="baseTop_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Bonus ganador (todas): <span id="bonus_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏁 Puntos bandera (todas): <span id="banderas_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Victorias: <span id="wins_agustin" class="text-slate-900 font-extrabold">0</span></div>
+          <div>⭐ Mejor día (base): <span id="best_agustin" class="text-slate-900 font-extrabold">0</span></div>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <div class="text-lg font-extrabold">Ricardo</div>
+        <div class="mt-3 text-sm font-bold text-slate-700 space-y-1">
+          <div>🎖️ HCP: <span id="hcp_ricardo" class="text-slate-900 font-extrabold">—</span></div>
+          <div>🎯 Jugadas: <span id="played_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>✅ Top-10 usadas: <span id="top10_ricardo" class="text-slate-900 font-extrabold">0/10</span></div>
+          <div>📌 Total (General): <span id="total_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🎯 Base (Top-10): <span id="baseTop_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Bonus ganador (todas): <span id="bonus_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏁 Puntos bandera (todas): <span id="banderas_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>🏆 Victorias: <span id="wins_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+          <div>⭐ Mejor día (base): <span id="best_ricardo" class="text-slate-900 font-extrabold">0</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <h2 class="text-2xl font-extrabold">📋 Historial</h2>
+      <div class="flex gap-3">
+        <button id="btnClear" class="px-4 py-2 rounded-2xl font-extrabold bg-red-600 hover:bg-red-700 text-white" type="button">🗑️ Borrar temporada</button>
+        <button id="btnExport" class="px-4 py-2 rounded-2xl font-extrabold bg-slate-900 hover:bg-slate-800 text-white" type="button">💾 Exportar</button>
+      </div>
+    </div>
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full text-sm md:text-base">
+        <thead>
+          <tr class="bg-slate-900 text-white">
+            <th class="p-3 text-left font-extrabold rounded-l-2xl">Fecha</th>
+            <th class="p-3 text-left font-extrabold">Campo</th>
+            <th class="p-3 text-center font-extrabold">Pedro</th>
+            <th class="p-3 text-center font-extrabold">Rodrigo</th>
+            <th class="p-3 text-center font-extrabold">Agustín</th>
+            <th class="p-3 text-center font-extrabold">Ricardo</th>
+            <th class="p-3 text-center font-extrabold">Ganador</th>
+            <th class="p-3 text-center font-extrabold">🏁</th>
+            <th class="p-3 text-center font-extrabold rounded-r-2xl">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-xs text-slate-500 font-semibold">✅ = la BASE de esa partida entra en el Top-10 · ❌ = la BASE se descarta (pero 🏆/🏁 suman igual) · ambas cuentan para hándicap</p>
+    <div id="empty" class="hidden text-center py-10 text-slate-600 font-bold">📝 No hay partidas todavía.</div>
+  </section>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5JSacRUi2OWIcOr9hyCplML56v9vWoKY",
+  authDomain: "golf-tra.firebaseapp.com",
+  projectId: "golf-tra",
+  storageBucket: "golf-tra.firebasestorage.app",
+  messagingSenderId: "1063285259916",
+  appId: "1:1063285259916:web:77cfda107794913efd05a9"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const HCP_DEFAULT = { pedro: 29, rodrigo: 15, agustin: 25, ricardo: 14 };
+const jugadores = [
+  { key: "pedro",   nombre: "Pedro",   color: "text-emerald-700" },
+  { key: "rodrigo", nombre: "Rodrigo", color: "text-sky-700" },
+  { key: "agustin", nombre: "Agustín", color: "text-violet-700" },
+  { key: "ricardo", nombre: "Ricardo", color: "text-amber-700" }
+];
+
+let partidas = [];
+let hcpBase = { ...HCP_DEFAULT };
+let handicaps = { ...HCP_DEFAULT };
+let editingId = null;
+
+const FLAG_TOTAL = 0.5;
+
+function joinHuman(list){
+  const arr = (list || []).filter(Boolean);
+  if (arr.length===0) return "";
+  if (arr.length===1) return arr[0];
+  if (arr.length===2) return arr[0] + " y " + arr[1];
+  return arr.slice(0,-1).join(", ") + " y " + arr[arr.length-1];
+}
+
+function getBanderaKeys(p){
+  const a = Array.isArray(p?.banderaKeys) ? p.banderaKeys : [];
+  const b = p?.banderaKey ? [p.banderaKey] : [];
+  return [...new Set([...a, ...b].map(x => (x||"").toString().trim()).filter(Boolean))];
+}
+function getBanderaKeysFromForm(){
+  return Array.from(document.querySelectorAll('#bandera input[type="checkbox"]:checked'))
+    .map(i => i.value)
+    .filter(Boolean);
+}
+function setBanderaForm(keys){
+  const set = new Set((keys || []).filter(Boolean));
+  document.querySelectorAll('#bandera input[type="checkbox"]').forEach(i=>{
+    i.checked = set.has(i.value);
+  });
+}
+
+const $ = (id) => document.getElementById(id);
+function toast(msg, type="ok") {
+  const d = document.createElement("div");
+  d.className = "fixed top-4 right-4 z-50 px-5 py-3 rounded-2xl font-extrabold shadow-lg " +
+                (type==="ok" ? "bg-emerald-600 text-white" : "bg-red-600 text-white");
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 2600);
+}
+function fmt(x) {
+  if (!Number.isFinite(x)) return "0";
+  const r = Math.round(x*100)/100;
+  return Number.isInteger(r) ? String(r) : r.toFixed(2).replace(".", ",");
+}
+function normText(s){ return (s ?? "").toString().trim(); }
+function normCampo(s){
+  const t = normText(s).toLowerCase();
+  if (t === "rsh norte" || t === "rsh campo norte") return "RSH campo norte";
+  if (t === "rsh sur"   || t === "rsh campo sur")   return "RSH campo sur";
+  return normText(s);
+}
+function parsePuntos(raw){
+  const t = normText(raw).toLowerCase();
+  if (!t) return { ok:false };
+  if (t==="nj" || t==="no juega" || t==="n/j" || t==="nojuega") return { ok:true, played:false, value:null };
+  const n = Number(t);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n<0 || n>50) return { ok:false };
+  return { ok:true, played:true, value:n };
+}
+function keyToNombre(k){ return (jugadores.find(j=>j.key===k)?.nombre) || ""; }
+
+function puntosDiaBase(p, key){
+  const base = p.puntos?.[key];
+  return Number.isFinite(base) ? base : null;
+}
+
+function puntosClasificacion(p, key){
+  const base = p.puntos?.[key];
+  if (!Number.isFinite(base)) return null;
+  const bandKeys = getBanderaKeys(p).filter(k => Number.isFinite(p.puntos?.[k]));
+  const extraBandera = (bandKeys.length && bandKeys.includes(key)) ? (FLAG_TOTAL / bandKeys.length) : 0;
+  return base + extraBandera;
+}
+
+function computeGanadoresBase(p){
+  const arr = jugadores
+    .map(j => ({key:j.key, base:puntosDiaBase(p, j.key)}))
+    .filter(x => Number.isFinite(x.base));
+  if (arr.length<2) return { winnersKeys:[], ganadoresArr:[], ganadoresTxt:"—", bonusEach:0, maxBase:0 };
+  const maxBase = Math.max(...arr.map(x=>x.base));
+  const winnersKeys = arr.filter(x=>x.base===maxBase).map(x=>x.key);
+  const winnersNames = winnersKeys.map(keyToNombre);
+  const bonusEach = winnersKeys.length ? (1 / winnersKeys.length) : 0;
+  return { winnersKeys, ganadoresArr:winnersNames, ganadoresTxt:winnersNames.join(" y "), bonusEach, maxBase };
+}
+
+function recalcularHandicapsDesdeBase(){
+  const h = { ...hcpBase };
+  const cron = [...partidas].slice().sort((a,b)=> (a.fecha||"").localeCompare(b.fecha||""));
+  cron.forEach(p=>{
+    jugadores.forEach(j=>{
+      const base = p.puntos?.[j.key];
+      if (!Number.isFinite(base)) return;
+      if (base >= 17)      h[j.key] = Math.max(0, h[j.key] - (base - 16));
+      else if (base < 15)  h[j.key] = h[j.key] + 1;
+    });
+  });
+  handicaps = h;
+}
+
+function setEditMode(on){
+  $("btnCancelEdit").classList.toggle("hidden", !on);
+  $("formTitle").textContent = on ? "✏️ Editar partida" : "➕ Nueva partida";
+  $("btnSave").textContent = on ? "💾 Guardar cambios" : "💾 Guardar";
+}
+
+function clearForm(){
+  $("fecha").valueAsDate = new Date();
+  $("campo").value = "";
+  $("p_pedro").value = "";
+  $("p_rodrigo").value = "";
+  $("p_agustin").value = "";
+  $("p_ricardo").value = "";
+  setBanderaForm([]);
+}
+
+function fillForm(p){
+  $("fecha").value = p.fecha || "";
+  $("campo").value = p.campo || "";
+  $("p_pedro").value   = Number.isFinite(p.puntos?.pedro)   ? p.puntos.pedro   : "NJ";
+  $("p_rodrigo").value = Number.isFinite(p.puntos?.rodrigo) ? p.puntos.rodrigo : "NJ";
+  $("p_agustin").value = Number.isFinite(p.puntos?.agustin) ? p.puntos.agustin : "NJ";
+  $("p_ricardo").value = Number.isFinite(p.puntos?.ricardo) ? p.puntos.ricardo : "NJ";
+  setBanderaForm(getBanderaKeys(p));
+}
+
+async function loadBase(){
+  const snap = await db.collection("meta").doc("state").get();
+  const data = snap.exists ? snap.data() : null;
+  const base = data?.hcpBase;
+  if (base && jugadores.every(j=>Number.isFinite(base[j.key]))) {
+    hcpBase = { ...base };
+  } else {
+    hcpBase = { ...HCP_DEFAULT };
+    await db.collection("meta").doc("state").set({ hcpBase }, { merge:true });
+  }
+}
+
+async function saveBase(newBase){
+  hcpBase = { ...newBase };
+  await db.collection("meta").doc("state").set({ hcpBase }, { merge:true });
+}
+
+function render(){
+  $("kpiPartidas").textContent = String(partidas.length);
+
+  const all = {};
+  const entries = {};
+  jugadores.forEach(j=>{
+    all[j.key] = { played:0, wins:0, bestBase:0, banderasTotal:0, bonusTotal:0 };
+    entries[j.key] = [];
+  });
+
+  partidas.forEach(p=>{
+    const g = computeGanadoresBase(p);
+    const bandKeys = getBanderaKeys(p).filter(k => Number.isFinite(p.puntos?.[k]));
+    const banderaShareEach = bandKeys.length ? (FLAG_TOTAL / bandKeys.length) : 0;
+
+    jugadores.forEach(j=>{
+      const base = puntosDiaBase(p, j.key);
+      if (!Number.isFinite(base)) return;
+
+      all[j.key].played += 1;
+      all[j.key].bestBase = Math.max(all[j.key].bestBase, base);
+
+      const bandera = (bandKeys.includes(j.key)) ? banderaShareEach : 0;
+      all[j.key].banderasTotal += bandera;
+
+      const isWinner = g.winnersKeys.includes(j.key);
+      if (isWinner) all[j.key].wins += 1;
+      const bonus = isWinner ? g.bonusEach : 0;
+      all[j.key].bonusTotal += bonus;
+
+      entries[j.key].push({
+        id: p.id,
+        fecha: p.fecha || "",
+        base,
+        bonus,
+        bandera,
+        clasif: base + bonus + bandera
+      });
+    });
+  });
+
+  const top10Ids = {};
+  const clasif = {};
+  jugadores.forEach(j=>{
+    const arr = entries[j.key] || [];
+    const sorted = arr.slice().sort((a,b)=>{
+      if (b.base !== a.base) return b.base - a.base;
+      const da = a.fecha || "";
+      const db = b.fecha || "";
+      if (db !== da) return db.localeCompare(da);
+      return (a.id || "").localeCompare(b.id || "");
+    });
+    const top = sorted.slice(0, 10);
+    top10Ids[j.key] = new Set(top.map(x=>x.id));
+    clasif[j.key] = {
+      used: top.length,
+      baseTop: top.reduce((sum,x)=> sum + (Number.isFinite(x.base) ? x.base : 0), 0),
+      bonusTop: top.reduce((sum,x)=> sum + (Number.isFinite(x.bonus) ? x.bonus : 0), 0),
+      banderasTop: top.reduce((sum,x)=> sum + (Number.isFinite(x.bandera) ? x.bandera : 0), 0)
+    };
+    clasif[j.key].total = (clasif[j.key].baseTop || 0) + (all[j.key].bonusTotal || 0) + (all[j.key].banderasTotal || 0);
+  });
+
+  const totals = jugadores.map(j=>({
+    key: j.key,
+    nombre: j.nombre,
+    total: (clasif[j.key]?.total) || 0,
+    wins: (all[j.key]?.wins) || 0,
+    banderas: (all[j.key]?.banderasTotal) || 0
+  }));
+  const maxPts = Math.max(0, ...totals.map(x=>x.total));
+  $("kpiLiderPuntos").textContent = maxPts>0 ? totals.filter(x=>x.total===maxPts).map(x=>x.nombre).join(" y ") : "—";
+  const maxWins = Math.max(0, ...totals.map(x=>x.wins));
+  $("kpiLiderWins").textContent   = maxWins>0 ? totals.filter(x=>x.wins===maxWins).map(x=>x.nombre).join(" y ") : "—";
+  const maxB = Math.max(0, ...totals.map(x=>x.banderas));
+  const EPS_B = 1e-9;
+  $("kpiLiderBanderas").textContent = maxB>0 ? totals.filter(x=>Math.abs(x.banderas-maxB)<EPS_B).map(x=>x.nombre).join(" y ") : "—";
+
+  jugadores.forEach(j=>{
+    $("hcpLbl_"+j.key).textContent = handicaps[j.key];
+    $("hcp_"+j.key).textContent    = handicaps[j.key];
+    $("played_"+j.key).textContent = all[j.key].played;
+    const t = clasif[j.key] || { used:0, total:0, baseTop:0 };
+    $("top10_"+j.key).textContent  = `${t.used}/10`;
+    $("total_"+j.key).textContent  = fmt(t.total);
+    $("baseTop_"+j.key).textContent= fmt(t.baseTop || 0);
+    $("bonus_"+j.key).textContent  = fmt(all[j.key].bonusTotal || 0);
+    $("banderas_"+j.key).textContent = fmt(all[j.key].banderasTotal || 0);
+    $("wins_"+j.key).textContent   = all[j.key].wins;
+    $("best_"+j.key).textContent   = all[j.key].bestBase;
+  });
+
+  const tbody = $("tbody");
+  if (partidas.length===0) {
+    tbody.innerHTML = "";
+    $("empty").classList.remove("hidden");
+    return;
+  }
+  $("empty").classList.add("hidden");
+
+  tbody.innerHTML = partidas.map(p=>{
+    const fechaTxt = (p.fecha ? new Date(p.fecha+"T00:00:00").toLocaleDateString("es-ES") : "—");
+    const g = computeGanadoresBase(p);
+    const bandKeys = getBanderaKeys(p).filter(k => Number.isFinite(p.puntos?.[k]));
+    const banderaShareEach = bandKeys.length ? (FLAG_TOTAL / bandKeys.length) : 0;
+    const bandNames = bandKeys.length ? bandKeys.map(keyToNombre) : [];
+    const band = bandNames.length ? joinHuman(bandNames) : "—";
+
+    const cell = (key, color) => {
+      const base = p.puntos?.[key];
+      if (!Number.isFinite(base)) return `<span class="font-extrabold ${color}">NJ</span>`;
+      const banderaShare = (bandKeys.length && bandKeys.includes(key)) ? banderaShareEach : 0;
+      const b = banderaShare ? `<span class="ml-1 text-[10px] font-extrabold bg-slate-900 text-white px-2 py-0.5 rounded-full">🏁+${fmt(banderaShare)}</span>` : "";
+      const isTop = top10Ids?.[key]?.has(p.id);
+      const topBadge = isTop
+        ? `<span class="ml-1 text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">✅</span>`
+        : `<span class="ml-1 text-[10px] font-extrabold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">❌</span>`;
+      return `<span class="font-extrabold ${color}">${base}</span>${b}${topBadge}`;
+    };
+
+    const bonusBadge = g.ganadoresArr.length ? `<span class="ml-2 text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">🏆+${fmt(g.bonusEach)}</span>` : "";
+
+    return `
+      <tr class="border-b border-slate-200 hover:bg-slate-50">
+        <td class="p-3 font-bold whitespace-nowrap">${fechaTxt}</td>
+        <td class="p-3 font-semibold text-slate-700">${p.campo || ""}</td>
+        <td class="p-3 text-center">${cell("pedro","text-emerald-700")}</td>
+        <td class="p-3 text-center">${cell("rodrigo","text-sky-700")}</td>
+        <td class="p-3 text-center">${cell("agustin","text-violet-700")}</td>
+        <td class="p-3 text-center">${cell("ricardo","text-amber-700")}</td>
+        <td class="p-3 text-center">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-slate-900 text-white">🥇 ${g.ganadoresTxt}</span>
+          ${bonusBadge}
+        </td>
+        <td class="p-3 text-center font-extrabold text-slate-700">${band}</td>
+        <td class="p-3 text-center whitespace-nowrap">
+          <button class="px-3 py-2 rounded-xl font-extrabold bg-slate-200 hover:bg-slate-300" data-edit="${p.id}">✏️</button>
+          <button class="ml-2 px-3 py-2 rounded-xl font-extrabold bg-red-600 hover:bg-red-700 text-white" data-del="${p.id}">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-edit");
+      const p = partidas.find(x=>x.id===id);
+      if (!p) return;
+      editingId = id;
+      setEditMode(true);
+      fillForm(p);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+  tbody.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-del");
+      if (!confirm("¿Borrar esta partida?")) return;
+      await db.collection("partidas").doc(id).delete();
+      toast("🗑️ Partida borrada");
+    });
+  });
+}
+
+async function savePartida(){
+  const fecha = $("fecha").value;
+  const campo = normCampo($("campo").value);
+  const banderaKeys = getBanderaKeysFromForm();
+
+  if (!fecha || !campo) return toast("⚠️ Completa fecha y campo", "err");
+
+  const raw = {
+    pedro: $("p_pedro").value,
+    rodrigo: $("p_rodrigo").value,
+    agustin: $("p_agustin").value,
+    ricardo: $("p_ricardo").value
+  };
+  const puntos = {};
+  let playedCount = 0;
+  for (const k of Object.keys(raw)){
+    const r = parsePuntos(raw[k]);
+    if (!r.ok) return toast('⚠️ Puntos: usa 0-50 o "NJ"/"No juega"', "err");
+    puntos[k] = r.value;
+    if (r.played) playedCount++;
+  }
+  if (playedCount < 2) return toast("⚠️ Deben jugar al menos 2 personas", "err");
+  if (banderaKeys.some(k => !Number.isFinite(puntos[k]))) return toast("⚠️ Bandera no puede ser para alguien con NJ", "err");
+
+  const data = {
+    fecha,
+    campo,
+    puntos,
+    banderaKeys,
+    banderaKey: banderaKeys[0] || "",
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  if (editingId) {
+    await db.collection("partidas").doc(editingId).set(data, { merge:true });
+    toast("✅ Cambios guardados");
+  } else {
+    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    await db.collection("partidas").add(data);
+    toast("✅ Partida guardada");
+  }
+
+  editingId = null;
+  setEditMode(false);
+  clearForm();
+}
+
+async function clearSeason(){
+  if (!confirm("⚠️ ¿Borrar toda la temporada?")) return;
+  await saveBase(handicaps);
+
+  const snap = await db.collection("partidas").get();
+  const docs = snap.docs;
+  while (docs.length){
+    const batch = db.batch();
+    docs.splice(0, 450).forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  }
+  toast("🗑️ Temporada borrada");
+}
+
+function exportJSON(){
+  const datos = {
+    campeonato: "I Love Viernes",
+    exportadoEn: new Date().toISOString(),
+    hcpBase,
+    handicapsActuales: handicaps,
+    totalPartidas: partidas.length,
+    partidas
+  };
+  const blob = new Blob([JSON.stringify(datos, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `golf-ILoveViernes-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("💾 Exportado");
+}
+
+async function boot(){
+  $("fecha").valueAsDate = new Date();
+  await loadBase();
+
+  db.collection("meta").doc("state").onSnapshot((doc)=>{
+    const d = doc.data();
+    if (d?.hcpBase && jugadores.every(j=>Number.isFinite(d.hcpBase[j.key]))) {
+      hcpBase = { ...d.hcpBase };
+      recalcularHandicapsDesdeBase();
+      render();
+    }
+  });
+
+  db.collection("partidas")
+    .orderBy("fecha", "desc")
+    .onSnapshot((snap)=>{
+      partidas = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      recalcularHandicapsDesdeBase();
+      render();
+    });
+
+  $("btnSave").addEventListener("click", savePartida);
+  $("btnCancelEdit").addEventListener("click", ()=>{
+    editingId = null;
+    setEditMode(false);
+    clearForm();
+    toast("Edición cancelada");
+  });
+  $("btnClear").addEventListener("click", clearSeason);
+  $("btnExport").addEventListener("click", exportJSON);
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Enter" && document.activeElement && String(document.activeElement.id||"").startsWith("p_")) {
+      e.preventDefault();
+      savePartida();
+    }
+  });
+}
+
+boot().catch(err=>{
+  console.error(err);
+  toast("⚠️ Error inicializando (mira Console)", "err");
+});
+</script>
+
+</body>
+</html>
